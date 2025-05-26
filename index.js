@@ -37,6 +37,9 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
             formData.linePictureUrl = userProfile.pictureUrl;
         }
         
+        // イベントIDを追加
+        formData.eventId = 'eid20250529';
+        
         // タイムスタンプを追加
         if (ENABLE_FIREBASE) {
             formData.submittedAt = firebase.firestore.FieldValue.serverTimestamp();
@@ -76,18 +79,48 @@ function collectFormData() {
     const formData = {
         // 基本情報
         studentId: document.getElementById('studentId').value.trim(),
-        grade: document.getElementById('grade').value,
-        department: document.getElementById('department').value.trim(),
+        studentName: document.getElementById('studentName').value.trim(),
         
-        // キャリア意識調査
-        careerThinking: document.querySelector('input[name="careerThinking"]:checked')?.value || '',
-        industries: getCheckedValues('industries'),
-        careerGoal: document.getElementById('careerGoal').value.trim(),
-        internshipExperience: document.querySelector('input[name="internshipExperience"]:checked')?.value || '',
-        skillDevelopment: document.getElementById('skillDevelopment').value.trim(),
+        // 企業別データ
+        companies: {
+            // ホーク・ワン
+            c01: {
+                name: 'ホーク・ワン',
+                participate_before: document.querySelector('input[name="c01participate_before"]:checked')?.value || '',
+                participate_after: document.querySelector('input[name="c01participate_after"]:checked')?.value || '',
+                impression_text: document.getElementById('c01impression_text').value.trim(),
+                schedule: getCheckedValues('c01schedule')
+            },
+            // アイスタイル
+            c02: {
+                name: 'アイスタイル',
+                participate_before: document.querySelector('input[name="c02participate_before"]:checked')?.value || '',
+                participate_after: document.querySelector('input[name="c02participate_after"]:checked')?.value || '',
+                impression_text: document.getElementById('c02impression_text').value.trim(),
+                schedule: getCheckedValues('c02schedule')
+            },
+            // ノバレーゼ
+            c03: {
+                name: 'ノバレーゼ',
+                participate_before: document.querySelector('input[name="c03participate_before"]:checked')?.value || '',
+                participate_after: document.querySelector('input[name="c03participate_after"]:checked')?.value || '',
+                impression_text: document.getElementById('c03impression_text').value.trim(),
+                schedule: getCheckedValues('c03schedule')
+            },
+            // ACROVE
+            c04: {
+                name: 'ACROVE',
+                participate_before: document.querySelector('input[name="c04participate_before"]:checked')?.value || '',
+                participate_after: document.querySelector('input[name="c04participate_after"]:checked')?.value || '',
+                impression_text: document.getElementById('c04impression_text').value.trim(),
+                schedule: getCheckedValues('c04schedule')
+            }
+        },
         
-        // その他
-        comments: document.getElementById('comments').value.trim()
+        // 総合評価
+        gd_level: document.querySelector('input[name="fixed1gd_level"]:checked')?.value || '',
+        event_satisfaction: document.querySelector('input[name="fixed2event_satisfaction"]:checked')?.value || '',
+        event_feedback: document.getElementById('fixed3event_feedback').value.trim()
     };
     
     return formData;
@@ -135,30 +168,12 @@ function showSuccess() {
     }, 3000);
 }
 
-// 業界選択のバリデーション（少なくとも1つ選択されているか）
-function validateIndustries() {
-    const checkboxes = document.querySelectorAll('input[name="industries"]');
-    const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-    
-    if (checkedCount === 0) {
-        // カスタムバリデーションメッセージを設定
-        checkboxes[0].setCustomValidity('少なくとも1つ選択してください');
-    } else {
-        checkboxes[0].setCustomValidity('');
-    }
-}
-
-// 業界チェックボックスにイベントリスナーを追加
+// デバッグ情報の表示
 document.addEventListener('DOMContentLoaded', () => {
-    const industryCheckboxes = document.querySelectorAll('input[name="industries"]');
-    industryCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', validateIndustries);
-    });
-    
-    // デバッグ情報の表示
     console.log('=== アプリケーション設定 ===');
     console.log('LIFF機能:', typeof ENABLE_LIFF !== 'undefined' && ENABLE_LIFF ? '有効' : '無効');
     console.log('Firebase機能:', ENABLE_FIREBASE ? '有効' : '無効');
+    console.log('イベントID: eid20250529');
     console.log('========================');
 });
 
