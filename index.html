@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>キャリアスタディ - アンケート</title>
+    <title>企業説明会アンケート - イベントID: eid20250529</title>
     <link rel="stylesheet" href="index.css">
     
     <!-- Firebase SDK -->
@@ -16,8 +16,9 @@
 <body>
     <div class="container">
         <header>
-            <h1>キャリアスタディ アンケート</h1>
-            <p class="subtitle">あなたのキャリアに関する意識調査にご協力ください</p>
+            <h1>企業説明会アンケート</h1>
+            <p class="subtitle">本日はご参加いただきありがとうございました</p>
+            <p class="event-id">イベントID: eid20250529</p>
         </header>
 
         <div id="loading" class="loading">
@@ -36,79 +37,190 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="grade">学年 <span class="required">*</span></label>
-                    <select id="grade" name="grade" required>
-                        <option value="">選択してください</option>
-                        <option value="1">1年生</option>
-                        <option value="2">2年生</option>
-                        <option value="3">3年生</option>
-                        <option value="4">4年生</option>
-                        <option value="other">その他</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="department">学部・学科 <span class="required">*</span></label>
-                    <input type="text" id="department" name="department" required>
+                    <label for="studentName">氏名 <span class="required">*</span></label>
+                    <input type="text" id="studentName" name="studentName" required>
                 </div>
             </section>
 
-            <!-- キャリア意識調査 -->
-            <section class="form-section">
-                <h2>キャリア意識調査</h2>
-
+            <!-- 企業1: ホーク・ワン -->
+            <section class="form-section company-section">
+                <h2>1. ホーク・ワン</h2>
+                
                 <div class="form-group">
-                    <label>Q1. 将来のキャリアについて考えていますか？ <span class="required">*</span></label>
+                    <label>【参加前】ホーク・ワンを知っていましたか？ <span class="required">*</span></label>
                     <div class="radio-group">
-                        <label><input type="radio" name="careerThinking" value="5" required> とても考えている</label>
-                        <label><input type="radio" name="careerThinking" value="4"> 考えている</label>
-                        <label><input type="radio" name="careerThinking" value="3"> どちらとも言えない</label>
-                        <label><input type="radio" name="careerThinking" value="2"> あまり考えていない</label>
-                        <label><input type="radio" name="careerThinking" value="1"> 全く考えていない</label>
+                        <label><input type="radio" name="c01participate_before" value="知っていて、興味があった。" required> 知っていて、興味があった。</label>
+                        <label><input type="radio" name="c01participate_before" value="知っていた。"> 知っていた。</label>
+                        <label><input type="radio" name="c01participate_before" value="知らなかった。"> 知らなかった。</label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Q2. 希望する業界はありますか？（複数選択可）</label>
+                    <label>【参加後】ホーク・ワンについてどう思いましたか？ <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="c01participate_after" value="とても興味を持ったので、選考やISに参加したい。" required> とても興味を持ったので、選考やISに参加したい。</label>
+                        <label><input type="radio" name="c01participate_after" value="興味を持ったので、説明会に参加したい。"> 興味を持ったので、説明会に参加したい。</label>
+                        <label><input type="radio" name="c01participate_after" value="あまり興味を持てなかった。"> あまり興味を持てなかった。</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="c01impression_text">ホーク・ワンについての印象・感想を教えてください</label>
+                    <textarea id="c01impression_text" name="c01impression_text" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>ホーク・ワンのイベント予約</label>
                     <div class="checkbox-group">
-                        <label><input type="checkbox" name="industries" value="IT"> IT・通信</label>
-                        <label><input type="checkbox" name="industries" value="finance"> 金融</label>
-                        <label><input type="checkbox" name="industries" value="consulting"> コンサルティング</label>
-                        <label><input type="checkbox" name="industries" value="manufacturing"> メーカー</label>
-                        <label><input type="checkbox" name="industries" value="retail"> 小売・流通</label>
-                        <label><input type="checkbox" name="industries" value="media"> メディア・広告</label>
-                        <label><input type="checkbox" name="industries" value="education"> 教育</label>
-                        <label><input type="checkbox" name="industries" value="government"> 公務員</label>
-                        <label><input type="checkbox" name="industries" value="other"> その他</label>
+                        <label><input type="checkbox" name="c01schedule" value="2025/03/18(火) 11:00～12:30"> 2025/03/18(火) 11:00～12:30</label>
+                        <label><input type="checkbox" name="c01schedule" value="2025/03/20(木) 15:00～16:30"> 2025/03/20(木) 15:00～16:30</label>
+                        <label><input type="checkbox" name="c01schedule" value="2025/03/19(水) 16:00～17:30"> 2025/03/19(水) 16:00～17:30</label>
+                        <label><input type="checkbox" name="c01schedule" value="2025/03/26(水) 16:00～17:30"> 2025/03/26(水) 16:00～17:30</label>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="careerGoal">Q3. キャリアの目標や夢を教えてください</label>
-                    <textarea id="careerGoal" name="careerGoal" rows="4"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Q4. インターンシップの経験はありますか？ <span class="required">*</span></label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="internshipExperience" value="yes" required> はい</label>
-                        <label><input type="radio" name="internshipExperience" value="no"> いいえ</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="skillDevelopment">Q5. 現在身につけたいスキルは何ですか？</label>
-                    <input type="text" id="skillDevelopment" name="skillDevelopment" placeholder="例：プログラミング、英語、プレゼンテーション">
                 </div>
             </section>
 
-            <!-- その他 -->
-            <section class="form-section">
-                <h2>その他</h2>
+            <!-- 企業2: アイスタイル -->
+            <section class="form-section company-section">
+                <h2>2. アイスタイル</h2>
+                
+                <div class="form-group">
+                    <label>【参加前】アイスタイルを知っていましたか？ <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="c02participate_before" value="知っていて、興味があった。" required> 知っていて、興味があった。</label>
+                        <label><input type="radio" name="c02participate_before" value="知っていた。"> 知っていた。</label>
+                        <label><input type="radio" name="c02participate_before" value="知らなかった。"> 知らなかった。</label>
+                    </div>
+                </div>
 
                 <div class="form-group">
-                    <label for="comments">ご意見・ご要望があればお聞かせください</label>
-                    <textarea id="comments" name="comments" rows="3"></textarea>
+                    <label>【参加後】アイスタイルについてどう思いましたか？ <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="c02participate_after" value="とても興味を持ったので、選考やISに参加したい。" required> とても興味を持ったので、選考やISに参加したい。</label>
+                        <label><input type="radio" name="c02participate_after" value="興味を持ったので、説明会に参加したい。"> 興味を持ったので、説明会に参加したい。</label>
+                        <label><input type="radio" name="c02participate_after" value="あまり興味を持てなかった。"> あまり興味を持てなかった。</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="c02impression_text">アイスタイルについての印象・感想を教えてください</label>
+                    <textarea id="c02impression_text" name="c02impression_text" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>アイスタイルのイベント予約</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="c02schedule" value="2025/03/18(火) 11:00～12:30"> 2025/03/18(火) 11:00～12:30</label>
+                        <label><input type="checkbox" name="c02schedule" value="2025/03/20(木) 15:00～16:30"> 2025/03/20(木) 15:00～16:30</label>
+                        <label><input type="checkbox" name="c02schedule" value="2025/03/19(水) 16:00～17:30"> 2025/03/19(水) 16:00～17:30</label>
+                        <label><input type="checkbox" name="c02schedule" value="2025/03/26(水) 16:00～17:30"> 2025/03/26(水) 16:00～17:30</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 企業3: ノバレーゼ -->
+            <section class="form-section company-section">
+                <h2>3. ノバレーゼ</h2>
+                
+                <div class="form-group">
+                    <label>【参加前】ノバレーゼを知っていましたか？ <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="c03participate_before" value="知っていて、興味があった。" required> 知っていて、興味があった。</label>
+                        <label><input type="radio" name="c03participate_before" value="知っていた。"> 知っていた。</label>
+                        <label><input type="radio" name="c03participate_before" value="知らなかった。"> 知らなかった。</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>【参加後】ノバレーゼについてどう思いましたか？ <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="c03participate_after" value="とても興味を持ったので、選考やISに参加したい。" required> とても興味を持ったので、選考やISに参加したい。</label>
+                        <label><input type="radio" name="c03participate_after" value="興味を持ったので、説明会に参加したい。"> 興味を持ったので、説明会に参加したい。</label>
+                        <label><input type="radio" name="c03participate_after" value="あまり興味を持てなかった。"> あまり興味を持てなかった。</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="c03impression_text">ノバレーゼについての印象・感想を教えてください</label>
+                    <textarea id="c03impression_text" name="c03impression_text" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>ノバレーゼのイベント予約</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="c03schedule" value="2025/03/18(火) 11:00～12:30"> 2025/03/18(火) 11:00～12:30</label>
+                        <label><input type="checkbox" name="c03schedule" value="2025/03/20(木) 15:00～16:30"> 2025/03/20(木) 15:00～16:30</label>
+                        <label><input type="checkbox" name="c03schedule" value="2025/03/19(水) 16:00～17:30"> 2025/03/19(水) 16:00～17:30</label>
+                        <label><input type="checkbox" name="c03schedule" value="2025/03/26(水) 16:00～17:30"> 2025/03/26(水) 16:00～17:30</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 企業4: ACROVE -->
+            <section class="form-section company-section">
+                <h2>4. ACROVE</h2>
+                
+                <div class="form-group">
+                    <label>【参加前】ACROVEを知っていましたか？ <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="c04participate_before" value="知っていて、興味があった。" required> 知っていて、興味があった。</label>
+                        <label><input type="radio" name="c04participate_before" value="知っていた。"> 知っていた。</label>
+                        <label><input type="radio" name="c04participate_before" value="知らなかった。"> 知らなかった。</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>【参加後】ACROVEについてどう思いましたか？ <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="c04participate_after" value="とても興味を持ったので、選考やISに参加したい。" required> とても興味を持ったので、選考やISに参加したい。</label>
+                        <label><input type="radio" name="c04participate_after" value="興味を持ったので、説明会に参加したい。"> 興味を持ったので、説明会に参加したい。</label>
+                        <label><input type="radio" name="c04participate_after" value="あまり興味を持てなかった。"> あまり興味を持てなかった。</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="c04impression_text">ACROVEについての印象・感想を教えてください</label>
+                    <textarea id="c04impression_text" name="c04impression_text" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>ACROVEのイベント予約</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="c04schedule" value="2025/03/18(火) 11:00～12:30"> 2025/03/18(火) 11:00～12:30</label>
+                        <label><input type="checkbox" name="c04schedule" value="2025/03/20(木) 15:00～16:30"> 2025/03/20(木) 15:00～16:30</label>
+                        <label><input type="checkbox" name="c04schedule" value="2025/03/19(水) 16:00～17:30"> 2025/03/19(水) 16:00～17:30</label>
+                        <label><input type="checkbox" name="c04schedule" value="2025/03/26(水) 16:00～17:30"> 2025/03/26(水) 16:00～17:30</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 総合評価 -->
+            <section class="form-section">
+                <h2>総合評価</h2>
+
+                <div class="form-group">
+                    <label>今日を振り返って、現時点でのGDレベルを教えてください <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="fixed1gd_level" value="かなりうまくいったと感じた。" required> かなりうまくいったと感じた。</label>
+                        <label><input type="radio" name="fixed1gd_level" value="うまくできたが、成長の余地があると感じた。"> うまくできたが、成長の余地があると感じた。</label>
+                        <label><input type="radio" name="fixed1gd_level" value="うまくいった部分もあったが、成長が必要だと感じた。"> うまくいった部分もあったが、成長が必要だと感じた。</label>
+                        <label><input type="radio" name="fixed1gd_level" value="まだまだ全体的に成長が必要だと感じた。"> まだまだ全体的に成長が必要だと感じた。</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>イベントの運営・内容に関する満足度を教えてください <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="fixed2event_satisfaction" value="とても満足だった。" required> とても満足だった。</label>
+                        <label><input type="radio" name="fixed2event_satisfaction" value="満足たっだ。"> 満足だった。</label>
+                        <label><input type="radio" name="fixed2event_satisfaction" value="不満だった。"> 不満だった。</label>
+                        <label><input type="radio" name="fixed2event_satisfaction" value="とても不満だった。"> とても不満だった。</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fixed3event_feedback">満足度の理由・感想・改善点を教えてください</label>
+                    <textarea id="fixed3event_feedback" name="fixed3event_feedback" rows="4"></textarea>
                 </div>
             </section>
 
