@@ -141,10 +141,6 @@ Firestoreの`survey`コレクションに以下の形式でデータが保存さ
   // イベント情報
   eventId: "eid20250529",
   
-  // 基本情報
-  studentId: "学籍番号",
-  studentName: "氏名",
-  
   // 企業別データ
   companies: {
     c01: {
