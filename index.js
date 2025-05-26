@@ -77,10 +77,6 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
 // フォームデータの収集
 function collectFormData() {
     const formData = {
-        // 基本情報
-        studentId: document.getElementById('studentId').value.trim(),
-        studentName: document.getElementById('studentName').value.trim(),
-        
         // 企業別データ
         companies: {
             // ホーク・ワン
