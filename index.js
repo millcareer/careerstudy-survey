@@ -8,9 +8,14 @@ const firebaseConfig = {
     appId: "YOUR-APP-ID"
 };
 
+// Firebase機能の有効/無効フラグ（false = UIテストモード）
+const ENABLE_FIREBASE = false;
+
 // Firebase初期化
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+if (ENABLE_FIREBASE) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = ENABLE_FIREBASE ? firebase.firestore() : null;
 
 // フォーム送信処理
 document.getElementById('surveyForm').addEventListener('submit', async (e) => {
@@ -25,22 +30,33 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
         // フォームデータの収集
         const formData = collectFormData();
         
-        // LINEユーザー情報を追加
-        if (userProfile) {
+        // LINEユーザー情報を追加（LIFF有効時のみ）
+        if (typeof userProfile !== 'undefined' && userProfile) {
             formData.lineUserId = userProfile.userId;
             formData.lineDisplayName = userProfile.displayName;
             formData.linePictureUrl = userProfile.pictureUrl;
         }
         
         // タイムスタンプを追加
-        formData.submittedAt = firebase.firestore.FieldValue.serverTimestamp();
+        if (ENABLE_FIREBASE) {
+            formData.submittedAt = firebase.firestore.FieldValue.serverTimestamp();
+        }
         formData.submittedAtLocal = new Date().toISOString();
         
-        // Firestoreに保存
-        await saveToFirestore(formData);
+        // Firestoreに保存（Firebase有効時のみ）
+        if (ENABLE_FIREBASE) {
+            await saveToFirestore(formData);
+        } else {
+            // UIテストモード：コンソールに出力
+            console.log('=== UIテストモード: フォームデータ ===');
+            console.log(formData);
+            console.log('=====================================');
+        }
         
-        // LINEでメッセージ送信
-        await sendLineMessage(formData);
+        // LINEでメッセージ送信（sendLineMessage関数がある場合）
+        if (typeof sendLineMessage === 'function') {
+            await sendLineMessage(formData);
+        }
         
         // 成功メッセージを表示
         showSuccess();
@@ -85,6 +101,11 @@ function getCheckedValues(name) {
 
 // Firestoreに保存
 async function saveToFirestore(data) {
+    if (!ENABLE_FIREBASE) {
+        console.log('Firebase無効のため、Firestore保存をスキップ');
+        return 'test-document-id';
+    }
+    
     try {
         // surveyコレクションに保存
         const docRef = await db.collection('survey').add(data);
@@ -106,9 +127,11 @@ function showSuccess() {
     // 成功メッセージを表示
     document.getElementById('successMessage').style.display = 'block';
     
-    // 3秒後にLIFFウィンドウを閉じる
+    // 3秒後にLIFFウィンドウを閉じる（closeLiff関数がある場合）
     setTimeout(() => {
-        closeLiff();
+        if (typeof closeLiff === 'function') {
+            closeLiff();
+        }
     }, 3000);
 }
 
@@ -131,13 +154,21 @@ document.addEventListener('DOMContentLoaded', () => {
     industryCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', validateIndustries);
     });
+    
+    // デバッグ情報の表示
+    console.log('=== アプリケーション設定 ===');
+    console.log('LIFF機能:', typeof ENABLE_LIFF !== 'undefined' && ENABLE_LIFF ? '有効' : '無効');
+    console.log('Firebase機能:', ENABLE_FIREBASE ? '有効' : '無効');
+    console.log('========================');
 });
 
 // デバッグ用：Firebaseの接続状態を確認
-firebase.firestore().enableNetwork()
-    .then(() => {
-        console.log('Firestore接続: オンライン');
-    })
-    .catch((error) => {
-        console.error('Firestore接続エラー:', error);
-    });
+if (ENABLE_FIREBASE && db) {
+    firebase.firestore().enableNetwork()
+        .then(() => {
+            console.log('Firestore接続: オンライン');
+        })
+        .catch((error) => {
+            console.error('Firestore接続エラー:', error);
+        });
+}
