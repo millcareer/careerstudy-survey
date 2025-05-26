@@ -1,14 +1,34 @@
-# キャリアスタディ - アンケートフォーム
+# 企業説明会アンケートフォーム
 
-LINE LIFF（LINE Front-end Framework）を利用したキャリア意識調査アンケートアプリケーションです。GitHub Pagesでホストされ、Firebase Firestoreにデータを保存します。
+LINE LIFF（LINE Front-end Framework）を利用した企業説明会参加者向けアンケートアプリケーションです。GitHub Pagesでホストされ、Firebase Firestoreにデータを保存します。
 
 ## 🎯 機能概要
 
-- LINE LIFFアプリとして動作
-- キャリアに関する意識調査アンケート
+- 企業説明会（4社）に関するアンケート収集
+- 参加前後の興味度変化を測定
+- イベント予約機能
 - Firebase Firestoreの`survey`コレクションにデータを保存
-- 提出完了時にLINEトークにメッセージを送信
+- 提出完了時にLINEトークにサマリーを送信
 - GitHub Pagesでホスティング（サーバーレス）
+
+## 📋 アンケート内容
+
+### 企業別質問（4社分）
+1. **ホーク・ワン**
+2. **アイスタイル**
+3. **ノバレーゼ**
+4. **ACROVE**
+
+各企業について：
+- 参加前の認知度
+- 参加後の興味度
+- 印象・感想（自由記述）
+- イベント予約選択
+
+### 総合評価
+- GD（グループディスカッション）レベル自己評価
+- イベント満足度
+- フィードバック（自由記述）
 
 ## 🛠 技術スタック
 
@@ -112,7 +132,48 @@ const ENABLE_LIFF = true; // false → true に変更
 4. Branch: `main`、フォルダ: `/ (root)`を選択
 5. Save をクリック
 
-数分後、`https://[YOUR-GITHUB-USERNAME].github.io/careerstudy-survey/`でアクセス可能になります。
+## 📊 データ構造
+
+Firestoreの`survey`コレクションに以下の形式でデータが保存されます：
+
+```javascript
+{
+  // イベント情報
+  eventId: "eid20250529",
+  
+  // 基本情報
+  studentId: "学籍番号",
+  studentName: "氏名",
+  
+  // 企業別データ
+  companies: {
+    c01: {
+      name: "ホーク・ワン",
+      participate_before: "知っていて、興味があった。",
+      participate_after: "とても興味を持ったので、選考やISに参加したい。",
+      impression_text: "印象・感想テキスト",
+      schedule: ["2025/03/18(火) 11:00～12:30", ...]
+    },
+    c02: { /* アイスタイル */ },
+    c03: { /* ノバレーゼ */ },
+    c04: { /* ACROVE */ }
+  },
+  
+  // 総合評価
+  gd_level: "うまくできたが、成長の余地があると感じた。",
+  event_satisfaction: "とても満足だった。",
+  event_feedback: "フィードバックテキスト",
+  
+  // LINE情報（LIFF有効時）
+  lineUserId: "LINE ユーザーID",
+  lineDisplayName: "LINE 表示名",
+  linePictureUrl: "LINE プロフィール画像URL",
+  
+  // タイムスタンプ
+  submittedAt: Firestore.Timestamp,
+  submittedAtLocal: "ISO形式の日時文字列"
+}
+```
 
 ## 🧪 開発モードとテスト
 
@@ -151,72 +212,46 @@ const ENABLE_FIREBASE = true; // Firebase有効
 ## 📱 使用方法
 
 1. LINE内でLIFFアプリのURLを開く
-2. アンケートフォームに回答
-3. 「アンケートを提出」ボタンをクリック
-4. 提出完了後、LINEトークに結果が送信される
-
-## 📊 データ構造
-
-Firestoreの`survey`コレクションに以下の形式でデータが保存されます：
-
-```javascript
-{
-  // 基本情報
-  studentId: "学籍番号",
-  grade: "学年",
-  department: "学部・学科",
-  
-  // キャリア意識調査
-  careerThinking: "1-5", // キャリアについて考えているか
-  industries: ["IT", "finance", ...], // 希望業界（配列）
-  careerGoal: "キャリアの目標",
-  internshipExperience: "yes/no",
-  skillDevelopment: "身につけたいスキル",
-  
-  // その他
-  comments: "コメント",
-  
-  // LINE情報
-  lineUserId: "LINE ユーザーID",
-  lineDisplayName: "LINE 表示名",
-  linePictureUrl: "LINE プロフィール画像URL",
-  
-  // タイムスタンプ
-  submittedAt: Firestore.Timestamp,
-  submittedAtLocal: "ISO形式の日時文字列"
-}
-```
+2. 各企業セクションのアンケートに回答
+3. 総合評価を入力
+4. 「アンケートを提出」ボタンをクリック
+5. 提出完了後、LINEトークにサマリーが送信される
 
 ## 🔧 カスタマイズ
 
-### アンケート項目の追加・変更
+### 企業情報の変更
 
-1. `index.html`でフォーム要素を追加
-2. `index.js`の`collectFormData()`関数でデータ収集処理を追加
-3. `liff.js`の`createSurveyMessage()`関数でLINEメッセージ形式を調整
+`index.html`で企業名や質問を変更：
+```html
+<h2>1. 新しい企業名</h2>
+```
 
-### スタイルの変更
+### イベントID・日程の変更
 
-`index.css`でデザインをカスタマイズできます。LINEアプリ内での表示を考慮し、モバイルファーストなデザインを心がけてください。
+`index.js`でイベントIDを変更：
+```javascript
+formData.eventId = 'eid20250529'; // 新しいイベントIDに変更
+```
+
+`index.html`で予約可能日程を変更：
+```html
+<label><input type="checkbox" name="c01schedule" value="新しい日程"> 新しい日程</label>
+```
 
 ## 🐛 トラブルシューティング
 
-### LIFFが初期化されない
-- `ENABLE_LIFF`が`true`になっているか確認
-- LIFF IDが正しく設定されているか確認
-- エンドポイントURLがGitHub PagesのURLと一致しているか確認
-- LINEアプリ内で開いているか確認（外部ブラウザでは一部機能が制限される）
+### フォームが表示されない
+- ブラウザのコンソールでエラーを確認
+- GitHub Pagesの設定を確認
 
-### Firestoreに保存されない
+### データがコンソールに表示されない
+- フォームの必須項目をすべて入力しているか確認
+- ブラウザの開発者ツールでコンソールを開いているか確認
+
+### 本番環境でFirestoreに保存されない
 - `ENABLE_FIREBASE`が`true`になっているか確認
 - Firebase設定が正しいか確認
 - Firestoreのセキュリティルールを確認
-- ブラウザのコンソールでエラーを確認
-
-### GitHub Pagesが表示されない
-- リポジトリがpublicになっているか確認
-- GitHub Pages設定が正しいか確認
-- デプロイに数分かかる場合があるので待つ
 
 ## 📄 ライセンス
 
