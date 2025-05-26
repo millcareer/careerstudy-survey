@@ -80,8 +80,6 @@ function createSurveyMessage(data) {
     let message = `【企業説明会アンケート提出完了】\n`;
     message += `━━━━━━━━━━━━━━━\n`;
     message += `イベントID: ${data.eventId}\n`;
-    message += `学籍番号: ${data.studentId}\n`;
-    message += `氏名: ${data.studentName}\n`;
     message += `━━━━━━━━━━━━━━━\n\n`;
     
     // 企業別の興味度
