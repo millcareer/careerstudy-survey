@@ -32,14 +32,29 @@ git clone https://github.com/millcareer/careerstudy-survey.git
 cd careerstudy-survey
 ```
 
-### 2. Firebase設定
+### 2. UIテストモード（デフォルト）
+
+現在、LIFF機能とFirebase機能は**デフォルトで無効**になっています。これにより、設定なしでUIをテストできます：
+
+- `liff.js`の`ENABLE_LIFF = false`（LIFF機能無効）
+- `index.js`の`ENABLE_FIREBASE = false`（Firebase機能無効）
+
+この状態で：
+- GitHub Pagesで通常のWebページとして動作
+- フォーム送信時にデータはコンソールに出力
+- LIFFログインやFirebase保存は行われない
+
+### 3. 本番環境への設定
+
+#### Firebase設定
 
 1. [Firebase Console](https://console.firebase.google.com/)でプロジェクトを作成
 2. Firestoreデータベースを有効化
 3. プロジェクトの設定から、WebアプリのFirebase設定情報を取得
-4. `index.js`の`firebaseConfig`を自分のプロジェクトの設定に置き換え：
+4. `index.js`を編集：
 
 ```javascript
+// Firebase設定を更新
 const firebaseConfig = {
     apiKey: "YOUR-API-KEY",
     authDomain: "YOUR-AUTH-DOMAIN",
@@ -48,9 +63,12 @@ const firebaseConfig = {
     messagingSenderId: "YOUR-MESSAGING-SENDER-ID",
     appId: "YOUR-APP-ID"
 };
+
+// Firebase機能を有効化
+const ENABLE_FIREBASE = true; // false → true に変更
 ```
 
-### 3. Firestoreセキュリティルール
+#### Firestoreセキュリティルール
 
 Firebaseコンソールで以下のセキュリティルールを設定：
 
@@ -67,7 +85,7 @@ service cloud.firestore {
 }
 ```
 
-### 4. LINE LIFF設定
+#### LINE LIFF設定
 
 1. [LINE Developers Console](https://developers.line.biz/console/)にログイン
 2. プロバイダーを作成（または既存のものを選択）
@@ -79,10 +97,14 @@ service cloud.firestore {
 5. 発行されたLIFF IDを`liff.js`に設定：
 
 ```javascript
+// LIFF IDを更新
 const liffId = 'YOUR-LIFF-ID-HERE';
+
+// LIFF機能を有効化
+const ENABLE_LIFF = true; // false → true に変更
 ```
 
-### 5. GitHub Pages設定
+### 4. GitHub Pages設定
 
 1. GitHubリポジトリの設定ページへ移動
 2. 「Pages」セクションを選択
@@ -91,6 +113,40 @@ const liffId = 'YOUR-LIFF-ID-HERE';
 5. Save をクリック
 
 数分後、`https://[YOUR-GITHUB-USERNAME].github.io/careerstudy-survey/`でアクセス可能になります。
+
+## 🧪 開発モードとテスト
+
+### UIテストモード
+```javascript
+// liff.js
+const ENABLE_LIFF = false;    // LIFF無効
+
+// index.js  
+const ENABLE_FIREBASE = false; // Firebase無効
+```
+- ブラウザで直接開いてUIをテスト
+- フォームデータはコンソールに出力
+
+### LIFF単体テスト
+```javascript
+// liff.js
+const ENABLE_LIFF = true;     // LIFF有効
+
+// index.js
+const ENABLE_FIREBASE = false; // Firebase無効
+```
+- LINEアプリ内でのみ動作確認
+- Firebaseには保存されない
+
+### 本番モード
+```javascript
+// liff.js
+const ENABLE_LIFF = true;    // LIFF有効
+
+// index.js
+const ENABLE_FIREBASE = true; // Firebase有効
+```
+- すべての機能が有効
 
 ## 📱 使用方法
 
@@ -146,11 +202,13 @@ Firestoreの`survey`コレクションに以下の形式でデータが保存さ
 ## 🐛 トラブルシューティング
 
 ### LIFFが初期化されない
+- `ENABLE_LIFF`が`true`になっているか確認
 - LIFF IDが正しく設定されているか確認
 - エンドポイントURLがGitHub PagesのURLと一致しているか確認
 - LINEアプリ内で開いているか確認（外部ブラウザでは一部機能が制限される）
 
 ### Firestoreに保存されない
+- `ENABLE_FIREBASE`が`true`になっているか確認
 - Firebase設定が正しいか確認
 - Firestoreのセキュリティルールを確認
 - ブラウザのコンソールでエラーを確認
