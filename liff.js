@@ -77,37 +77,76 @@ async function sendLineMessage(surveyData) {
 
 // アンケート結果メッセージの作成
 function createSurveyMessage(data) {
-    const industries = data.industries.length > 0 ? data.industries.join(', ') : 'なし';
-    
-    let message = `【キャリアアンケート提出完了】\n`;
+    let message = `【企業説明会アンケート提出完了】\n`;
     message += `━━━━━━━━━━━━━━━\n`;
+    message += `イベントID: ${data.eventId}\n`;
     message += `学籍番号: ${data.studentId}\n`;
-    message += `学年: ${data.grade}年生\n`;
-    message += `学部・学科: ${data.department}\n`;
-    message += `━━━━━━━━━━━━━━━\n`;
-    message += `キャリア意識: ${getCareerThinkingText(data.careerThinking)}\n`;
-    message += `希望業界: ${industries}\n`;
-    message += `インターン経験: ${data.internshipExperience === 'yes' ? 'あり' : 'なし'}\n`;
+    message += `氏名: ${data.studentName}\n`;
+    message += `━━━━━━━━━━━━━━━\n\n`;
     
-    if (data.careerGoal) {
-        message += `\nキャリア目標:\n${data.careerGoal}\n`;
+    // 企業別の興味度
+    const companies = data.companies;
+    const interestedCompanies = [];
+    const eventReservations = [];
+    
+    Object.keys(companies).forEach((key) => {
+        const company = companies[key];
+        // 選考やISに参加したい企業
+        if (company.participate_after.includes('選考やISに参加したい')) {
+            interestedCompanies.push(company.name);
+        }
+        // イベント予約がある企業
+        if (company.schedule.length > 0) {
+            eventReservations.push({
+                name: company.name,
+                schedules: company.schedule
+            });
+        }
+    });
+    
+    if (interestedCompanies.length > 0) {
+        message += `◆ 選考参加希望企業:\n`;
+        interestedCompanies.forEach(name => {
+            message += `  ・${name}\n`;
+        });
+        message += '\n';
     }
+    
+    if (eventReservations.length > 0) {
+        message += `◆ イベント予約:\n`;
+        eventReservations.forEach(reservation => {
+            message += `【${reservation.name}】\n`;
+            reservation.schedules.forEach(schedule => {
+                message += `  ${schedule}\n`;
+            });
+        });
+        message += '\n';
+    }
+    
+    message += `━━━━━━━━━━━━━━━\n`;
+    message += `総合評価:\n`;
+    message += `GDレベル: ${getShortText(data.gd_level)}\n`;
+    message += `満足度: ${getShortText(data.event_satisfaction)}\n`;
     
     message += `\n提出日時: ${new Date().toLocaleString('ja-JP')}`;
     
     return message;
 }
 
-// キャリア意識の数値をテキストに変換
-function getCareerThinkingText(value) {
-    const texts = {
-        '5': 'とても考えている',
-        '4': '考えている',
-        '3': 'どちらとも言えない',
-        '2': 'あまり考えていない',
-        '1': '全く考えていない'
+// 長い選択肢テキストを短縮
+function getShortText(value) {
+    const shortTexts = {
+        'かなりうまくいったと感じた。': 'かなりうまくいった',
+        'うまくできたが、成長の余地があると感じた。': 'うまくできた',
+        'うまくいった部分もあったが、成長が必要だと感じた。': '成長が必要',
+        'まだまだ全体的に成長が必要だと感じた。': '全体的に成長が必要',
+        'とても満足だった。': 'とても満足',
+        '満足たっだ。': '満足',
+        '満足だった。': '満足',
+        '不満だった。': '不満',
+        'とても不満だった。': 'とても不満'
     };
-    return texts[value] || '未回答';
+    return shortTexts[value] || value;
 }
 
 // LIFFウィンドウを閉じる
