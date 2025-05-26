@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>キャリアスタディ - アンケート</title>
+    <link rel="stylesheet" href="index.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    
+    <!-- LINE LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>キャリアスタディ アンケート</h1>
+            <p class="subtitle">あなたのキャリアに関する意識調査にご協力ください</p>
+        </header>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>読み込み中...</p>
+        </div>
+
+        <form id="surveyForm" style="display: none;">
+            <!-- 基本情報 -->
+            <section class="form-section">
+                <h2>基本情報</h2>
+                
+                <div class="form-group">
+                    <label for="studentId">学籍番号 <span class="required">*</span></label>
+                    <input type="text" id="studentId" name="studentId" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="grade">学年 <span class="required">*</span></label>
+                    <select id="grade" name="grade" required>
+                        <option value="">選択してください</option>
+                        <option value="1">1年生</option>
+                        <option value="2">2年生</option>
+                        <option value="3">3年生</option>
+                        <option value="4">4年生</option>
+                        <option value="other">その他</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="department">学部・学科 <span class="required">*</span></label>
+                    <input type="text" id="department" name="department" required>
+                </div>
+            </section>
+
+            <!-- キャリア意識調査 -->
+            <section class="form-section">
+                <h2>キャリア意識調査</h2>
+
+                <div class="form-group">
+                    <label>Q1. 将来のキャリアについて考えていますか？ <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="careerThinking" value="5" required> とても考えている</label>
+                        <label><input type="radio" name="careerThinking" value="4"> 考えている</label>
+                        <label><input type="radio" name="careerThinking" value="3"> どちらとも言えない</label>
+                        <label><input type="radio" name="careerThinking" value="2"> あまり考えていない</label>
+                        <label><input type="radio" name="careerThinking" value="1"> 全く考えていない</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Q2. 希望する業界はありますか？（複数選択可）</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="industries" value="IT"> IT・通信</label>
+                        <label><input type="checkbox" name="industries" value="finance"> 金融</label>
+                        <label><input type="checkbox" name="industries" value="consulting"> コンサルティング</label>
+                        <label><input type="checkbox" name="industries" value="manufacturing"> メーカー</label>
+                        <label><input type="checkbox" name="industries" value="retail"> 小売・流通</label>
+                        <label><input type="checkbox" name="industries" value="media"> メディア・広告</label>
+                        <label><input type="checkbox" name="industries" value="education"> 教育</label>
+                        <label><input type="checkbox" name="industries" value="government"> 公務員</label>
+                        <label><input type="checkbox" name="industries" value="other"> その他</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="careerGoal">Q3. キャリアの目標や夢を教えてください</label>
+                    <textarea id="careerGoal" name="careerGoal" rows="4"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Q4. インターンシップの経験はありますか？ <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="internshipExperience" value="yes" required> はい</label>
+                        <label><input type="radio" name="internshipExperience" value="no"> いいえ</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="skillDevelopment">Q5. 現在身につけたいスキルは何ですか？</label>
+                    <input type="text" id="skillDevelopment" name="skillDevelopment" placeholder="例：プログラミング、英語、プレゼンテーション">
+                </div>
+            </section>
+
+            <!-- その他 -->
+            <section class="form-section">
+                <h2>その他</h2>
+
+                <div class="form-group">
+                    <label for="comments">ご意見・ご要望があればお聞かせください</label>
+                    <textarea id="comments" name="comments" rows="3"></textarea>
+                </div>
+            </section>
+
+            <div class="button-group">
+                <button type="submit" id="submitBtn" class="submit-btn">
+                    アンケートを提出
+                </button>
+            </div>
+        </form>
+
+        <div id="successMessage" class="success-message" style="display: none;">
+            <div class="success-icon">✓</div>
+            <h2>アンケートを提出しました</h2>
+            <p>ご協力ありがとうございました。</p>
+            <p class="close-message">このウィンドウは自動的に閉じます...</p>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <h2>エラーが発生しました</h2>
+            <p id="errorText"></p>
+            <button onclick="location.reload()">再読み込み</button>
+        </div>
+    </div>
+
+    <script src="liff.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>
