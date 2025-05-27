@@ -29,7 +29,17 @@ const RATING_MAP = {
     "とても満足だった。": 4,
     "満足だった。": 3,
     "不満だった。": 2,
-    "とても不満だった。": 1
+    "とても不満だった。": 1,
+    
+    // 企業への認知度（参加前）
+    "知っていて、興味があった。": 3,
+    "知っていた。": 2,
+    "知らなかった。": 1,
+    
+    // 企業への興味度（参加後）
+    "とても興味を持ったので、選考やISに参加したい。": 3,
+    "興味を持ったので、説明会に参加したい。": 2,
+    "あまり興味を持てなかった。": 1
 };
 
 // フォーム送信処理
@@ -96,7 +106,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     }
 });
 
-// フォームデータの収集（簡潔な形式）
+// フォームデータの収集
 function collectFormData() {
     // GDレベルとイベント満足度の値を取得
     const gdLevelText = document.querySelector('input[name="fixed1gd_level"]:checked')?.value || '';
@@ -109,36 +119,38 @@ function collectFormData() {
         satisfactionReason: document.getElementById('fixed3event_feedback')?.value.trim() || ''
     };
     
-    // 必要に応じて企業別データも収集（別のコレクションに保存する場合）
-    // この部分は要件に応じてコメントアウトまたは削除可能
-    /*
+    // 企業別データを収集
     const companiesData = {};
     EVENT_CONFIG.companies.forEach(company => {
+        const beforeText = document.querySelector(`input[name="${company.id}participate_before"]:checked`)?.value || '';
+        const afterText = document.querySelector(`input[name="${company.id}participate_after"]:checked`)?.value || '';
+        
         const companyData = {
-            name: company.name,
-            participate_before: document.querySelector(`input[name="${company.id}participate_before"]:checked`)?.value || '',
-            participate_after: document.querySelector(`input[name="${company.id}participate_after"]:checked`)?.value || '',
-            impression_text: document.getElementById(`${company.id}impression_text`)?.value.trim() || '',
-            schedule: []
+            companyName: company.name,
+            beforeAwareness: RATING_MAP[beforeText] || 0,  // 認知度を数値化
+            afterInterest: RATING_MAP[afterText] || 0,     // 興味度を数値化
+            impression: document.getElementById(`${company.id}impression_text`)?.value.trim() || '',
+            selectedSchedules: []
         };
         
+        // スケジュール選択を収集
         const scheduleCheckboxes = document.querySelectorAll(`input[name="${company.id}schedule"]:checked`);
         scheduleCheckboxes.forEach(checkbox => {
             const datetime = checkbox.value;
             const scheduleInfo = company.schedules.find(s => s.datetime === datetime);
-            companyData.schedule.push({
+            companyData.selectedSchedules.push({
                 datetime: datetime,
                 title: scheduleInfo?.title || '',
-                description: scheduleInfo?.description || ''
+                isUnavailable: datetime === "日程が合わない"
             });
         });
         
+        // 企業IDをキーとして保存
         companiesData[company.id] = companyData;
     });
     
-    // 企業データを別途保存する場合はここで処理
-    formData._companiesData = companiesData;
-    */
+    // 企業データを含める
+    formData.companies = companiesData;
     
     return formData;
 }
@@ -151,26 +163,9 @@ async function saveToFirestore(data) {
     }
     
     try {
-        // 企業データがある場合は分離
-        const companiesData = data._companiesData;
-        delete data._companiesData;
-        
         // surveyコレクションに保存
         const docRef = await db.collection('survey').add(data);
         console.log('Firestore保存成功:', docRef.id);
-        
-        // 必要に応じて企業データを別コレクションに保存
-        /*
-        if (companiesData) {
-            await db.collection('survey_companies').add({
-                surveyId: docRef.id,
-                userId: data.userId,
-                eventId: data.eventId,
-                companies: companiesData,
-                submitTimestamp: data.submitTimestamp
-            });
-        }
-        */
         
         // ドキュメントIDを返す
         return docRef.id;
