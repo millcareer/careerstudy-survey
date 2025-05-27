@@ -33,6 +33,11 @@ const EVENT_CONFIG = {
                     datetime: "2025/03/26(水) 16:00～17:30",
                     title: "選考説明会",
                     description: "選考プロセスや求める人物像についてご説明します"
+                },
+                {
+                    datetime: "日程が合わない",
+                    title: "日程が合わない",
+                    description: "現在提示されている日程では都合がつかない場合"
                 }
             ]
         },
@@ -61,6 +66,11 @@ const EVENT_CONFIG = {
                     datetime: "2025/03/26(水) 16:00～17:30",
                     title: "オフィスツアー＆座談会",
                     description: "実際のオフィスを見学し、社員と直接話せる機会"
+                },
+                {
+                    datetime: "日程が合わない",
+                    title: "日程が合わない",
+                    description: "現在提示されている日程では都合がつかない場合"
                 }
             ]
         },
@@ -89,6 +99,11 @@ const EVENT_CONFIG = {
                     datetime: "2025/03/26(水) 16:00～17:30",
                     title: "キャリアパス説明会",
                     description: "入社後のキャリア形成について詳しく説明"
+                },
+                {
+                    datetime: "日程が合わない",
+                    title: "日程が合わない",
+                    description: "現在提示されている日程では都合がつかない場合"
                 }
             ]
         },
@@ -117,6 +132,11 @@ const EVENT_CONFIG = {
                     datetime: "2025/03/26(水) 16:00～17:30",
                     title: "コンサルタント適性診断会",
                     description: "簡単な適性診断とフィードバックを実施"
+                },
+                {
+                    datetime: "日程が合わない",
+                    title: "日程が合わない",
+                    description: "現在提示されている日程では都合がつかない場合"
                 }
             ]
         }
