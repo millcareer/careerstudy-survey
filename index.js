@@ -17,7 +17,7 @@ if (ENABLE_FIREBASE) {
 }
 const db = ENABLE_FIREBASE ? firebase.firestore() : null;
 
-// 評価を数値に変換するマッピング
+// 評価を数値に変換するマッピング（総合評価のみ）
 const RATING_MAP = {
     // GDレベル
     "かなりうまくいったと感じた。": 4,
@@ -29,17 +29,7 @@ const RATING_MAP = {
     "とても満足だった。": 4,
     "満足だった。": 3,
     "不満だった。": 2,
-    "とても不満だった。": 1,
-    
-    // 企業への認知度（参加前）
-    "知っていて、興味があった。": 3,
-    "知っていた。": 2,
-    "知らなかった。": 1,
-    
-    // 企業への興味度（参加後）
-    "とても興味を持ったので、選考やISに参加したい。": 3,
-    "興味を持ったので、説明会に参加したい。": 2,
-    "あまり興味を持てなかった。": 1
+    "とても不満だった。": 1
 };
 
 // フォーム送信処理
@@ -122,13 +112,10 @@ function collectFormData() {
     // 企業別データを収集
     const companiesData = {};
     EVENT_CONFIG.companies.forEach(company => {
-        const beforeText = document.querySelector(`input[name="${company.id}participate_before"]:checked`)?.value || '';
-        const afterText = document.querySelector(`input[name="${company.id}participate_after"]:checked`)?.value || '';
-        
         const companyData = {
             companyName: company.name,
-            beforeAwareness: RATING_MAP[beforeText] || 0,  // 認知度を数値化
-            afterInterest: RATING_MAP[afterText] || 0,     // 興味度を数値化
+            beforeAwareness: document.querySelector(`input[name="${company.id}participate_before"]:checked`)?.value || '',
+            afterInterest: document.querySelector(`input[name="${company.id}participate_after"]:checked`)?.value || '',
             impression: document.getElementById(`${company.id}impression_text`)?.value.trim() || '',
             selectedSchedules: []
         };
@@ -141,7 +128,7 @@ function collectFormData() {
             companyData.selectedSchedules.push({
                 datetime: datetime,
                 title: scheduleInfo?.title || '',
-                isUnavailable: datetime === "日程が合わない"
+                isUnavailable: datetime === "日程が合わない"  // 「日程が合わない」かどうかを判別
             });
         });
         
