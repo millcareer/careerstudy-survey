@@ -75,7 +75,7 @@ async function sendLineMessage(surveyData) {
     }
 }
 
-// アンケート結果メッセージの作成
+// アンケート結果メッセージの作成（新しいデータ構造に対応）
 function createSurveyMessage(data) {
     let message = `【${EVENT_CONFIG.eventTitle}アンケート提出完了】\n`;
     message += `━━━━━━━━━━━━━━━\n`;
@@ -90,14 +90,15 @@ function createSurveyMessage(data) {
     Object.keys(companies).forEach((key) => {
         const company = companies[key];
         // 選考やISに参加したい企業
-        if (company.participate_after.includes('選考やISに参加したい')) {
-            interestedCompanies.push(company.name);
+        if (company.afterInterest && company.afterInterest.includes('選考やISに参加したい')) {
+            interestedCompanies.push(company.companyName);
         }
-        // イベント予約がある企業
-        if (company.schedule.length > 0) {
+        // イベント予約がある企業（「日程が合わない」以外の選択がある場合）
+        const actualEvents = company.selectedSchedules.filter(s => !s.isUnavailable);
+        if (actualEvents.length > 0) {
             eventReservations.push({
-                name: company.name,
-                schedules: company.schedule
+                name: company.companyName,
+                schedules: actualEvents
             });
         }
     });
@@ -124,29 +125,55 @@ function createSurveyMessage(data) {
         message += '\n';
     }
     
+    // 「日程が合わない」を選択した企業
+    const unavailableCompanies = [];
+    Object.keys(companies).forEach((key) => {
+        const company = companies[key];
+        const hasOnlyUnavailable = company.selectedSchedules.length > 0 && 
+                                  company.selectedSchedules.every(s => s.isUnavailable);
+        if (hasOnlyUnavailable) {
+            unavailableCompanies.push(company.companyName);
+        }
+    });
+    
+    if (unavailableCompanies.length > 0) {
+        message += `◆ 日程が合わない企業:\n`;
+        unavailableCompanies.forEach(name => {
+            message += `  ・${name}\n`;
+        });
+        message += '\n';
+    }
+    
     message += `━━━━━━━━━━━━━━━\n`;
     message += `総合評価:\n`;
-    message += `GDレベル: ${getShortText(data.gd_level)}\n`;
-    message += `満足度: ${getShortText(data.event_satisfaction)}\n`;
+    message += `GDレベル: ${getGdLevelText(data.gdLevel)}\n`;
+    message += `満足度: ${getSatisfactionText(data.eventSatisfaction)}\n`;
     
     message += `\n提出日時: ${new Date().toLocaleString('ja-JP')}`;
     
     return message;
 }
 
-// 長い選択肢テキストを短縮
-function getShortText(value) {
-    const shortTexts = {
-        'かなりうまくいったと感じた。': 'かなりうまくいった',
-        'うまくできたが、成長の余地があると感じた。': 'うまくできた',
-        'うまくいった部分もあったが、成長が必要だと感じた。': '成長が必要',
-        'まだまだ全体的に成長が必要だと感じた。': '全体的に成長が必要',
-        'とても満足だった。': 'とても満足',
-        '満足だった。': '満足',
-        '不満だった。': '不満',
-        'とても不満だった。': 'とても不満'
+// GDレベルの数値をテキストに変換
+function getGdLevelText(level) {
+    const texts = {
+        4: 'かなりうまくいった',
+        3: 'うまくできた',
+        2: '成長が必要',
+        1: '全体的に成長が必要'
     };
-    return shortTexts[value] || value;
+    return texts[level] || `レベル${level}`;
+}
+
+// 満足度の数値をテキストに変換
+function getSatisfactionText(level) {
+    const texts = {
+        4: 'とても満足',
+        3: '満足',
+        2: '不満',
+        1: 'とても不満'
+    };
+    return texts[level] || `レベル${level}`;
 }
 
 // LIFFウィンドウを閉じる
