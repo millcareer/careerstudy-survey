@@ -1,34 +1,14 @@
-# 企業説明会アンケートフォーム
+# 企業説明会アンケートフォーム（設定ファイル版）
 
 LINE LIFF（LINE Front-end Framework）を利用した企業説明会参加者向けアンケートアプリケーションです。GitHub Pagesでホストされ、Firebase Firestoreにデータを保存します。
 
-## 🎯 機能概要
+## 🎯 主な特徴
 
-- 企業説明会（4社）に関するアンケート収集
-- 参加前後の興味度変化を測定
-- イベント予約機能
-- Firebase Firestoreの`survey`コレクションにデータを保存
-- 提出完了時にLINEトークにサマリーを送信
-- GitHub Pagesでホスティング（サーバーレス）
-
-## 📋 アンケート内容
-
-### 企業別質問（4社分）
-1. **ホーク・ワン**
-2. **アイスタイル**
-3. **ノバレーゼ**
-4. **ACROVE**
-
-各企業について：
-- 参加前の認知度
-- 参加後の興味度
-- 印象・感想（自由記述）
-- イベント予約選択
-
-### 総合評価
-- GD（グループディスカッション）レベル自己評価
-- イベント満足度
-- フィードバック（自由記述）
+- **設定ファイルで簡単カスタマイズ** - `config.js`を編集するだけで企業やイベント情報を変更可能
+- **UIUXの向上** - 進捗バー、アニメーション、カスタムコントロール
+- **イベント予約の詳細表示** - タイトルと説明文を含む詳細なスケジュール表示
+- **動的フォーム生成** - 企業数に応じて自動的にフォームを生成
+- **レスポンシブデザイン** - モバイル最適化されたUI
 
 ## 🛠 技術スタック
 
@@ -52,9 +32,41 @@ git clone https://github.com/millcareer/careerstudy-survey.git
 cd careerstudy-survey
 ```
 
-### 2. UIテストモード（デフォルト）
+### 2. イベント設定の変更
 
-現在、LIFF機能とFirebase機能は**デフォルトで無効**になっています。これにより、設定なしでUIをテストできます：
+`config.js`ファイルを編集して、イベント情報を設定します：
+
+```javascript
+const EVENT_CONFIG = {
+    // イベント基本情報
+    eventId: "eid20250605",  // イベントIDを変更
+    eventTitle: "夏季インターンシップ説明会",
+    eventSubtitle: "本日はご参加いただきありがとうございました",
+    
+    // 参加企業リスト
+    companies: [
+        {
+            id: "c01",
+            name: "株式会社サンプル",
+            description: "業界をリードする革新的な企業",
+            color: "#FF6B6B", // 企業カラー（オプション）
+            schedules: [
+                {
+                    datetime: "2025/06/10(月) 14:00～16:00",
+                    title: "会社説明会",
+                    description: "事業内容や社風について詳しくご説明します"
+                },
+                // スケジュールを追加...
+            ]
+        },
+        // 企業を追加...
+    ]
+};
+```
+
+### 3. UIテストモード（デフォルト）
+
+現在、LIFF機能とFirebase機能は**デフォルトで無効**になっています：
 
 - `liff.js`の`ENABLE_LIFF = false`（LIFF機能無効）
 - `index.js`の`ENABLE_FIREBASE = false`（Firebase機能無効）
@@ -62,16 +74,13 @@ cd careerstudy-survey
 この状態で：
 - GitHub Pagesで通常のWebページとして動作
 - フォーム送信時にデータはコンソールに出力
-- LIFFログインやFirebase保存は行われない
+- 進捗バーとアニメーションが動作
 
-### 3. 本番環境への設定
+### 4. 本番環境への設定
 
 #### Firebase設定
 
-1. [Firebase Console](https://console.firebase.google.com/)でプロジェクトを作成
-2. Firestoreデータベースを有効化
-3. プロジェクトの設定から、WebアプリのFirebase設定情報を取得
-4. `index.js`を編集：
+`index.js`を編集：
 
 ```javascript
 // Firebase設定を更新
@@ -88,33 +97,9 @@ const firebaseConfig = {
 const ENABLE_FIREBASE = true; // false → true に変更
 ```
 
-#### Firestoreセキュリティルール
-
-Firebaseコンソールで以下のセキュリティルールを設定：
-
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // surveyコレクションへの書き込みを許可
-    match /survey/{document} {
-      allow read: if false;  // 読み取りは禁止
-      allow create: if true; // 作成のみ許可
-    }
-  }
-}
-```
-
 #### LINE LIFF設定
 
-1. [LINE Developers Console](https://developers.line.biz/console/)にログイン
-2. プロバイダーを作成（または既存のものを選択）
-3. 新規チャネル作成で「LINE Login」を選択
-4. LIFFアプリを追加：
-   - サイズ: Full
-   - エンドポイントURL: `https://[YOUR-GITHUB-USERNAME].github.io/careerstudy-survey/`
-   - Scope: `profile`を選択
-5. 発行されたLIFF IDを`liff.js`に設定：
+`liff.js`を編集：
 
 ```javascript
 // LIFF IDを更新
@@ -124,7 +109,7 @@ const liffId = 'YOUR-LIFF-ID-HERE';
 const ENABLE_LIFF = true; // false → true に変更
 ```
 
-### 4. GitHub Pages設定
+### 5. GitHub Pages設定
 
 1. GitHubリポジトリの設定ページへ移動
 2. 「Pages」セクションを選択
@@ -148,11 +133,15 @@ Firestoreの`survey`コレクションに以下の形式でデータが保存さ
       participate_before: "知っていて、興味があった。",
       participate_after: "とても興味を持ったので、選考やISに参加したい。",
       impression_text: "印象・感想テキスト",
-      schedule: ["2025/03/18(火) 11:00～12:30", ...]
+      schedule: [
+        {
+          datetime: "2025/03/18(火) 11:00～12:30",
+          title: "会社説明会",
+          description: "事業内容や社風について詳しくご説明します"
+        }
+      ]
     },
-    c02: { /* アイスタイル */ },
-    c03: { /* ノバレーゼ */ },
-    c04: { /* ACROVE */ }
+    // 他の企業データ...
   },
   
   // 総合評価
@@ -171,83 +160,80 @@ Firestoreの`survey`コレクションに以下の形式でデータが保存さ
 }
 ```
 
-## 🧪 開発モードとテスト
+## 🎨 カスタマイズガイド
 
-### UIテストモード
+### 企業の追加・削除
+
+`config.js`の`companies`配列を編集：
+
 ```javascript
-// liff.js
-const ENABLE_LIFF = false;    // LIFF無効
-
-// index.js  
-const ENABLE_FIREBASE = false; // Firebase無効
+companies: [
+    {
+        id: "c05", // ユニークなID
+        name: "新規企業株式会社",
+        description: "企業の説明",
+        color: "#E91E63", // オプション：企業カラー
+        schedules: [
+            // スケジュール情報
+        ]
+    }
+]
 ```
-- ブラウザで直接開いてUIをテスト
-- フォームデータはコンソールに出力
 
-### LIFF単体テスト
+### 質問文の変更
+
+`config.js`の`questions`セクションを編集：
+
 ```javascript
-// liff.js
-const ENABLE_LIFF = true;     // LIFF有効
-
-// index.js
-const ENABLE_FIREBASE = false; // Firebase無効
-```
-- LINEアプリ内でのみ動作確認
-- Firebaseには保存されない
-
-### 本番モード
-```javascript
-// liff.js
-const ENABLE_LIFF = true;    // LIFF有効
-
-// index.js
-const ENABLE_FIREBASE = true; // Firebase有効
-```
-- すべての機能が有効
-
-## 📱 使用方法
-
-1. LINE内でLIFFアプリのURLを開く
-2. 各企業セクションのアンケートに回答
-3. 総合評価を入力
-4. 「アンケートを提出」ボタンをクリック
-5. 提出完了後、LINEトークにサマリーが送信される
-
-## 🔧 カスタマイズ
-
-### 企業情報の変更
-
-`index.html`で企業名や質問を変更：
-```html
-<h2>1. 新しい企業名</h2>
+questions: {
+    before: {
+        title: "【参加前】{company}についてご存知でしたか？",
+        options: [
+            "よく知っていた",
+            "名前は聞いたことがある",
+            "初めて知った"
+        ]
+    }
+}
 ```
 
-### イベントID・日程の変更
+### UIカラーの変更
 
-`index.js`でイベントIDを変更：
-```javascript
-formData.eventId = 'eid20250529'; // 新しいイベントIDに変更
-```
+`index.css`でメインカラーを変更：
 
-`index.html`で予約可能日程を変更：
-```html
-<label><input type="checkbox" name="c01schedule" value="新しい日程"> 新しい日程</label>
+```css
+:root {
+    --primary-color: #06c755; /* LINEグリーン */
+    --secondary-color: #05a948;
+}
 ```
 
 ## 🐛 トラブルシューティング
 
-### フォームが表示されない
-- ブラウザのコンソールでエラーを確認
-- GitHub Pagesの設定を確認
+### 企業が表示されない
+- `config.js`の構文エラーを確認
+- ブラウザのコンソールでエラーメッセージを確認
 
-### データがコンソールに表示されない
-- フォームの必須項目をすべて入力しているか確認
-- ブラウザの開発者ツールでコンソールを開いているか確認
+### 進捗バーが動作しない
+- 必須項目（`required`）の設定を確認
+- `form-builder.js`が正しく読み込まれているか確認
 
-### 本番環境でFirestoreに保存されない
-- `ENABLE_FIREBASE`が`true`になっているか確認
-- Firebase設定が正しいか確認
-- Firestoreのセキュリティルールを確認
+### スケジュールの説明文が表示されない
+- `config.js`で各スケジュールに`description`フィールドが設定されているか確認
+
+## 📝 運用フロー
+
+1. **イベント準備**
+   - `config.js`でイベントID、企業情報、スケジュールを設定
+   - GitHubにプッシュ
+
+2. **イベント当日**
+   - 参加者にLIFFアプリのURLを共有
+   - アンケート回答を収集
+
+3. **イベント後**
+   - Firestoreでデータを確認
+   - 次回イベントのために`config.js`を更新
 
 ## 📄 ライセンス
 
