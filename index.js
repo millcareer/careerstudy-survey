@@ -17,6 +17,21 @@ if (ENABLE_FIREBASE) {
 }
 const db = ENABLE_FIREBASE ? firebase.firestore() : null;
 
+// 評価を数値に変換するマッピング
+const RATING_MAP = {
+    // GDレベル
+    "かなりうまくいったと感じた。": 4,
+    "うまくできたが、成長の余地があると感じた。": 3,
+    "うまくいった部分もあったが、成長が必要だと感じた。": 2,
+    "まだまだ全体的に成長が必要だと感じた。": 1,
+    
+    // イベント満足度
+    "とても満足だった。": 4,
+    "満足だった。": 3,
+    "不満だった。": 2,
+    "とても不満だった。": 1
+};
+
 // フォーム送信処理
 document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -36,9 +51,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
         
         // LINEユーザー情報を追加（LIFF有効時のみ）
         if (typeof userProfile !== 'undefined' && userProfile) {
-            formData.lineUserId = userProfile.userId;
-            formData.lineDisplayName = userProfile.displayName;
-            formData.linePictureUrl = userProfile.pictureUrl;
+            formData.userId = userProfile.userId;
         }
         
         // イベントIDを追加
@@ -46,9 +59,10 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
         
         // タイムスタンプを追加
         if (ENABLE_FIREBASE) {
-            formData.submittedAt = firebase.firestore.FieldValue.serverTimestamp();
+            formData.submitTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+        } else {
+            formData.submitTimestamp = new Date();
         }
-        formData.submittedAtLocal = new Date().toISOString();
         
         // Firestoreに保存（Firebase有効時のみ）
         if (ENABLE_FIREBASE) {
@@ -82,14 +96,23 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     }
 });
 
-// フォームデータの収集
+// フォームデータの収集（簡潔な形式）
 function collectFormData() {
+    // GDレベルとイベント満足度の値を取得
+    const gdLevelText = document.querySelector('input[name="fixed1gd_level"]:checked')?.value || '';
+    const eventSatisfactionText = document.querySelector('input[name="fixed2event_satisfaction"]:checked')?.value || '';
+    
     const formData = {
-        // 企業別データ
-        companies: {}
+        // 数値に変換した評価
+        gdLevel: RATING_MAP[gdLevelText] || 0,
+        eventSatisfaction: RATING_MAP[eventSatisfactionText] || 0,
+        satisfactionReason: document.getElementById('fixed3event_feedback')?.value.trim() || ''
     };
     
-    // 各企業のデータを収集
+    // 必要に応じて企業別データも収集（別のコレクションに保存する場合）
+    // この部分は要件に応じてコメントアウトまたは削除可能
+    /*
+    const companiesData = {};
     EVENT_CONFIG.companies.forEach(company => {
         const companyData = {
             name: company.name,
@@ -99,11 +122,9 @@ function collectFormData() {
             schedule: []
         };
         
-        // スケジュールデータを収集
         const scheduleCheckboxes = document.querySelectorAll(`input[name="${company.id}schedule"]:checked`);
         scheduleCheckboxes.forEach(checkbox => {
             const datetime = checkbox.value;
-            // config.jsから該当するスケジュール情報を取得
             const scheduleInfo = company.schedules.find(s => s.datetime === datetime);
             companyData.schedule.push({
                 datetime: datetime,
@@ -112,13 +133,12 @@ function collectFormData() {
             });
         });
         
-        formData.companies[company.id] = companyData;
+        companiesData[company.id] = companyData;
     });
     
-    // 総合評価
-    formData.gd_level = document.querySelector('input[name="fixed1gd_level"]:checked')?.value || '';
-    formData.event_satisfaction = document.querySelector('input[name="fixed2event_satisfaction"]:checked')?.value || '';
-    formData.event_feedback = document.getElementById('fixed3event_feedback')?.value.trim() || '';
+    // 企業データを別途保存する場合はここで処理
+    formData._companiesData = companiesData;
+    */
     
     return formData;
 }
@@ -131,9 +151,26 @@ async function saveToFirestore(data) {
     }
     
     try {
+        // 企業データがある場合は分離
+        const companiesData = data._companiesData;
+        delete data._companiesData;
+        
         // surveyコレクションに保存
         const docRef = await db.collection('survey').add(data);
         console.log('Firestore保存成功:', docRef.id);
+        
+        // 必要に応じて企業データを別コレクションに保存
+        /*
+        if (companiesData) {
+            await db.collection('survey_companies').add({
+                surveyId: docRef.id,
+                userId: data.userId,
+                eventId: data.eventId,
+                companies: companiesData,
+                submitTimestamp: data.submitTimestamp
+            });
+        }
+        */
         
         // ドキュメントIDを返す
         return docRef.id;
