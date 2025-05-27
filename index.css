@@ -167,6 +167,18 @@ textarea:focus {
     box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.1);
 }
 
+/* 必須項目の入力エラー時 */
+input:invalid,
+textarea:invalid {
+    border-color: #ff4444;
+}
+
+input:invalid:focus,
+textarea:invalid:focus {
+    border-color: #ff4444;
+    box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.1);
+}
+
 textarea {
     resize: vertical;
     min-height: 80px;
@@ -298,6 +310,14 @@ textarea {
     color: #666;
     margin-top: 8px;
     line-height: 1.4;
+}
+
+/* エラーメッセージ（フィールド用） */
+.form-group .error-message {
+    color: #ff4444;
+    font-size: 13px;
+    margin-top: 5px;
+    display: none;
 }
 
 /* ボタン */
