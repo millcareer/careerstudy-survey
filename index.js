@@ -21,10 +21,14 @@ const db = ENABLE_FIREBASE ? firebase.firestore() : null;
 document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // 送信ボタンを無効化
+    // 送信ボタンを更新
     const submitBtn = document.getElementById('submitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    
     submitBtn.disabled = true;
-    submitBtn.textContent = '送信中...';
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'flex';
     
     try {
         // フォームデータの収集
@@ -38,7 +42,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
         }
         
         // イベントIDを追加
-        formData.eventId = 'eid20250529';
+        formData.eventId = EVENT_CONFIG.eventId;
         
         // タイムスタンプを追加
         if (ENABLE_FIREBASE) {
@@ -54,6 +58,9 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
             console.log('=== UIテストモード: フォームデータ ===');
             console.log(formData);
             console.log('=====================================');
+            
+            // テストモードでは少し待機してリアルな送信をシミュレート
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
         
         // LINEでメッセージ送信（sendLineMessage関数がある場合）
@@ -70,7 +77,8 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
         
         // ボタンを再度有効化
         submitBtn.disabled = false;
-        submitBtn.textContent = 'アンケートを提出';
+        btnText.style.display = 'block';
+        btnLoading.style.display = 'none';
     }
 });
 
@@ -78,54 +86,41 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
 function collectFormData() {
     const formData = {
         // 企業別データ
-        companies: {
-            // ホーク・ワン
-            c01: {
-                name: 'ホーク・ワン',
-                participate_before: document.querySelector('input[name="c01participate_before"]:checked')?.value || '',
-                participate_after: document.querySelector('input[name="c01participate_after"]:checked')?.value || '',
-                impression_text: document.getElementById('c01impression_text').value.trim(),
-                schedule: getCheckedValues('c01schedule')
-            },
-            // アイスタイル
-            c02: {
-                name: 'アイスタイル',
-                participate_before: document.querySelector('input[name="c02participate_before"]:checked')?.value || '',
-                participate_after: document.querySelector('input[name="c02participate_after"]:checked')?.value || '',
-                impression_text: document.getElementById('c02impression_text').value.trim(),
-                schedule: getCheckedValues('c02schedule')
-            },
-            // ノバレーゼ
-            c03: {
-                name: 'ノバレーゼ',
-                participate_before: document.querySelector('input[name="c03participate_before"]:checked')?.value || '',
-                participate_after: document.querySelector('input[name="c03participate_after"]:checked')?.value || '',
-                impression_text: document.getElementById('c03impression_text').value.trim(),
-                schedule: getCheckedValues('c03schedule')
-            },
-            // ACROVE
-            c04: {
-                name: 'ACROVE',
-                participate_before: document.querySelector('input[name="c04participate_before"]:checked')?.value || '',
-                participate_after: document.querySelector('input[name="c04participate_after"]:checked')?.value || '',
-                impression_text: document.getElementById('c04impression_text').value.trim(),
-                schedule: getCheckedValues('c04schedule')
-            }
-        },
-        
-        // 総合評価
-        gd_level: document.querySelector('input[name="fixed1gd_level"]:checked')?.value || '',
-        event_satisfaction: document.querySelector('input[name="fixed2event_satisfaction"]:checked')?.value || '',
-        event_feedback: document.getElementById('fixed3event_feedback').value.trim()
+        companies: {}
     };
     
+    // 各企業のデータを収集
+    EVENT_CONFIG.companies.forEach(company => {
+        const companyData = {
+            name: company.name,
+            participate_before: document.querySelector(`input[name="${company.id}participate_before"]:checked`)?.value || '',
+            participate_after: document.querySelector(`input[name="${company.id}participate_after"]:checked`)?.value || '',
+            impression_text: document.getElementById(`${company.id}impression_text`)?.value.trim() || '',
+            schedule: []
+        };
+        
+        // スケジュールデータを収集
+        const scheduleCheckboxes = document.querySelectorAll(`input[name="${company.id}schedule"]:checked`);
+        scheduleCheckboxes.forEach(checkbox => {
+            const datetime = checkbox.value;
+            // config.jsから該当するスケジュール情報を取得
+            const scheduleInfo = company.schedules.find(s => s.datetime === datetime);
+            companyData.schedule.push({
+                datetime: datetime,
+                title: scheduleInfo?.title || '',
+                description: scheduleInfo?.description || ''
+            });
+        });
+        
+        formData.companies[company.id] = companyData;
+    });
+    
+    // 総合評価
+    formData.gd_level = document.querySelector('input[name="fixed1gd_level"]:checked')?.value || '';
+    formData.event_satisfaction = document.querySelector('input[name="fixed2event_satisfaction"]:checked')?.value || '';
+    formData.event_feedback = document.getElementById('fixed3event_feedback')?.value.trim() || '';
+    
     return formData;
-}
-
-// チェックボックスの値を配列で取得
-function getCheckedValues(name) {
-    const checkboxes = document.querySelectorAll(`input[name="${name}"]:checked`);
-    return Array.from(checkboxes).map(cb => cb.value);
 }
 
 // Firestoreに保存
@@ -153,6 +148,9 @@ function showSuccess() {
     // フォームを非表示
     document.getElementById('surveyForm').style.display = 'none';
     
+    // 進捗バーを非表示
+    document.querySelector('.progress-container').style.display = 'none';
+    
     // 成功メッセージを表示
     document.getElementById('successMessage').style.display = 'block';
     
@@ -169,7 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('=== アプリケーション設定 ===');
     console.log('LIFF機能:', typeof ENABLE_LIFF !== 'undefined' && ENABLE_LIFF ? '有効' : '無効');
     console.log('Firebase機能:', ENABLE_FIREBASE ? '有効' : '無効');
-    console.log('イベントID: eid20250529');
+    console.log('イベントID:', EVENT_CONFIG?.eventId || '未設定');
+    console.log('登録企業数:', EVENT_CONFIG?.companies?.length || 0);
     console.log('========================');
 });
 
