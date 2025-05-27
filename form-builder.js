@@ -81,31 +81,35 @@ function generateCompanySections() {
         });
         html += '</div></div>';
         
-        // 印象・感想
+        // 印象・感想（必須化）
         const impressionQ = EVENT_CONFIG.questions.impression;
         html += `
             <div class="form-group">
-                <label for="${company.id}impression_text">${impressionQ.title.replace('{company}', company.name)}</label>
+                <label for="${company.id}impression_text">${impressionQ.title.replace('{company}', company.name)} <span class="required">*</span></label>
                 <textarea id="${company.id}impression_text" 
                          name="${company.id}impression_text" 
                          rows="3"
-                         placeholder="${impressionQ.placeholder || ''}"></textarea>
+                         placeholder="${impressionQ.placeholder || ''}"
+                         required></textarea>
             </div>
         `;
         
-        // イベント予約
+        // イベント予約（少なくとも1つ必須）
         const scheduleQ = EVENT_CONFIG.questions.schedule;
         html += `
             <div class="form-group">
-                <label>${scheduleQ.title.replace('{company}', company.name)}</label>
-                ${scheduleQ.description ? `<p class="field-description">${scheduleQ.description}</p>` : ''}
-                <div class="checkbox-group">
+                <label>${scheduleQ.title.replace('{company}', company.name)} <span class="required">*</span></label>
+                ${scheduleQ.description ? `<p class="field-description">${scheduleQ.description}<br><span style="color: #ff4444;">※少なくとも1つ選択してください</span></p>` : ''}
+                <div class="checkbox-group" data-company-id="${company.id}">
         `;
         
         company.schedules.forEach((schedule, i) => {
             html += `
                 <label class="schedule-label">
-                    <input type="checkbox" name="${company.id}schedule" value="${schedule.datetime}">
+                    <input type="checkbox" 
+                           name="${company.id}schedule" 
+                           value="${schedule.datetime}"
+                           onchange="validateScheduleSelection('${company.id}')">
                     <div class="schedule-content">
                         <div class="schedule-header">
                             <span class="schedule-datetime">${schedule.datetime}</span>
@@ -118,7 +122,14 @@ function generateCompanySections() {
             `;
         });
         
-        html += '</div></div>';
+        html += `
+                </div>
+                <div class="error-message" id="${company.id}schedule-error" style="display: none; color: #ff4444; font-size: 13px; margin-top: 5px;">
+                    少なくとも1つのイベントを選択してください
+                </div>
+            </div>
+        `;
+        
         section.innerHTML = html;
         container.appendChild(section);
     });
@@ -165,42 +176,82 @@ function generateGeneralQuestions() {
     });
     html += '</div></div>';
     
-    // フィードバック
+    // フィードバック（必須化）
     const feedbackQ = EVENT_CONFIG.generalQuestions.event_feedback;
     html += `
         <div class="form-group">
-            <label for="fixed3event_feedback">${feedbackQ.title}</label>
+            <label for="fixed3event_feedback">${feedbackQ.title} <span class="required">*</span></label>
             <textarea id="fixed3event_feedback" 
                      name="fixed3event_feedback" 
                      rows="4"
-                     placeholder="${feedbackQ.placeholder || ''}"></textarea>
+                     placeholder="${feedbackQ.placeholder || ''}"
+                     required></textarea>
         </div>
     `;
     
     container.innerHTML = html;
 }
 
+// スケジュール選択のバリデーション
+function validateScheduleSelection(companyId) {
+    const checkboxes = document.querySelectorAll(`input[name="${companyId}schedule"]`);
+    const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+    const errorDiv = document.getElementById(`${companyId}schedule-error`);
+    
+    if (checkedCount === 0) {
+        errorDiv.style.display = 'block';
+        checkboxes.forEach(cb => cb.setCustomValidity('少なくとも1つ選択してください'));
+    } else {
+        errorDiv.style.display = 'none';
+        checkboxes.forEach(cb => cb.setCustomValidity(''));
+    }
+    
+    // 進捗バーを更新
+    updateProgress();
+}
+
 // 進捗バーの更新
 function updateProgress() {
     const form = document.getElementById('surveyForm');
-    const requiredInputs = form.querySelectorAll('input[required]');
-    const requiredGroups = {};
+    const requiredInputs = form.querySelectorAll('input[required], textarea[required]');
+    const checkboxGroups = {};
+    let totalRequired = 0;
+    let completedRequired = 0;
     
-    // 必須入力をグループ化
+    // 必須入力をチェック
     requiredInputs.forEach(input => {
-        const name = input.name;
-        if (!requiredGroups[name]) {
-            requiredGroups[name] = false;
-        }
-        if (input.checked) {
-            requiredGroups[name] = true;
+        if (input.type === 'radio') {
+            const name = input.name;
+            if (!checkboxGroups[name]) {
+                checkboxGroups[name] = false;
+                totalRequired++;
+            }
+            if (input.checked) {
+                checkboxGroups[name] = true;
+            }
+        } else if (input.type === 'textarea' || input.type === 'text') {
+            totalRequired++;
+            if (input.value.trim() !== '') {
+                completedRequired++;
+            }
         }
     });
     
-    // 完了したグループ数を計算
-    const totalGroups = Object.keys(requiredGroups).length;
-    const completedGroups = Object.values(requiredGroups).filter(v => v).length;
-    const progress = totalGroups > 0 ? Math.round((completedGroups / totalGroups) * 100) : 0;
+    // ラジオボタングループの完了数を計算
+    completedRequired += Object.values(checkboxGroups).filter(v => v).length;
+    
+    // チェックボックスグループ（スケジュール）をチェック
+    EVENT_CONFIG.companies.forEach(company => {
+        totalRequired++;
+        const checkboxes = document.querySelectorAll(`input[name="${company.id}schedule"]`);
+        const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+        if (checkedCount > 0) {
+            completedRequired++;
+        }
+    });
+    
+    // 進捗を計算
+    const progress = totalRequired > 0 ? Math.round((completedRequired / totalRequired) * 100) : 0;
     
     // 進捗バーを更新
     const progressBar = document.getElementById('progressBar');
@@ -220,3 +271,25 @@ function updateProgress() {
         progressBar.style.backgroundColor = '#03A9F4';
     }
 }
+
+// フォーム送信前のバリデーション
+document.getElementById('surveyForm').addEventListener('submit', (e) => {
+    // スケジュール選択の最終確認
+    let isValid = true;
+    
+    EVENT_CONFIG.companies.forEach(company => {
+        const checkboxes = document.querySelectorAll(`input[name="${company.id}schedule"]`);
+        const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+        
+        if (checkedCount === 0) {
+            e.preventDefault();
+            isValid = false;
+            document.getElementById(`${company.id}schedule-error`).style.display = 'block';
+            checkboxes.forEach(cb => cb.setCustomValidity('少なくとも1つ選択してください'));
+        }
+    });
+    
+    if (!isValid) {
+        alert('すべての必須項目を入力してください。\n特に、各企業のイベント予約を少なくとも1つ選択してください。');
+    }
+});
