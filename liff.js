@@ -77,7 +77,7 @@ async function sendLineMessage(surveyData) {
 
 // アンケート結果メッセージの作成
 function createSurveyMessage(data) {
-    let message = `【企業説明会アンケート提出完了】\n`;
+    let message = `【${EVENT_CONFIG.eventTitle}アンケート提出完了】\n`;
     message += `━━━━━━━━━━━━━━━\n`;
     message += `イベントID: ${data.eventId}\n`;
     message += `━━━━━━━━━━━━━━━\n\n`;
@@ -115,7 +115,10 @@ function createSurveyMessage(data) {
         eventReservations.forEach(reservation => {
             message += `【${reservation.name}】\n`;
             reservation.schedules.forEach(schedule => {
-                message += `  ${schedule}\n`;
+                message += `  📅 ${schedule.datetime}\n`;
+                if (schedule.title) {
+                    message += `     ${schedule.title}\n`;
+                }
             });
         });
         message += '\n';
