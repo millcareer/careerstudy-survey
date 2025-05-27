@@ -3,8 +3,8 @@
 const EVENT_CONFIG = {
     // イベント基本情報
     eventId: "eid20250529",
-    eventTitle: "企業説明会",
-    eventSubtitle: "本日はご参加いただきありがとうございました",
+    eventTitle: "INTERN QUEST 終了後アンケート",
+    eventSubtitle: "出欠確認も含めているので、必ず回答をお願いします！アンケート内容はイベント翌日にキャリスタアプリに反映され、ワークの開放が行われます。※アンケートの提出が完了しないと、ワークが開放しません。",
     
     // 参加企業リスト
     companies: [
